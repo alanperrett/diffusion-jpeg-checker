@@ -1,0 +1,129 @@
+/*
+ * 2nd go at a jpg consistency checker. This one has a class FolderCrawler
+ * which holds all the properties and methods for the folder in question.
+ * A class JpgFilesList is used to 
+ */
+package jpgconsistencychecker;
+
+import java.io.File;
+
+/**
+ *
+ * @author APerrett 13-5-15
+ */
+public class FolderCrawler  {
+    private int numOfFiles;
+    private int numOfJpgs;
+    private int numOfReadable;
+    private int numOfZeroByte;
+    private File[] listOfFiles;
+    public static File DEFAULT_DIRECTORY = new File("E:\\DCIM\\100ADIFF");
+    final String EXTENSION = "JPG"; // extension of the files to be counted
+    private static File myDirectory = DEFAULT_DIRECTORY; // will be updated if non-default passed to MyFolder()
+    private JpgFilesList MyJpgs;
+    
+    FolderCrawler(File myDirectory){
+        this.numOfFiles = (int)myDirectory.length();
+        this.listOfFiles = myDirectory.listFiles();
+        this.numOfReadable = getNumOfReadable();
+        this.numOfJpgs = getNumOfJpgs();
+        this.numOfZeroByte = getNumOfZeroByte();
+        this.myDirectory = myDirectory;
+        this.MyJpgs = new JpgFilesList(myDirectory);
+    }
+    public static File getUserDirectory(){
+        return myDirectory;
+    }
+    public static void setUserDirectory(File f){
+        myDirectory = f;
+    }
+    public int getNumOfJpgs(){
+        // Find how many .jpg are in the directory
+        String currentFile;
+        int index; //position of the '.' in the filename
+        int numOfJpgs = 0;
+        
+        for (int i = 0; i < listOfFiles.length; i++){
+            currentFile = listOfFiles[i].getName();
+            // find the positon of the '.'
+            index = currentFile.lastIndexOf('.');
+            String extension = currentFile.substring(index+1);
+            if ((extension.toUpperCase()).equals(EXTENSION)){
+                   numOfJpgs++;
+            }
+        }
+        return numOfJpgs;
+    }
+   public int getNumOfReadable(){
+       //Find out how many readable files are in the directory
+       int numOfReadable = 0; //Counter for the number of readable
+       for (int i = 0; i < listOfFiles.length; i++){
+            if ((listOfFiles[i].isFile()) && listOfFiles[i].canRead()){
+                numOfReadable++;
+            }
+       
+        }
+       return numOfReadable;
+    }
+   public int getNumOfZeroByte(){
+       // Find out how many zero byte files are there
+       int numOfZeroByte = 0;
+       
+       for (int i = 0; i < listOfFiles.length; i++){
+           if ((listOfFiles[i].length() == 0) && (listOfFiles[i].isFile()))
+               numOfZeroByte++;
+            }
+       return numOfZeroByte;
+   }
+   public File[] getListOfFiles(){
+       return this.listOfFiles;
+   }
+   
+
+   
+    public class JpgFilesList {
+        JpgFile[] jpgList;
+        private int index; // position of the '.' in the file name
+        private String currentFile; // name of the file being examined
+        private String extension; // substring of the file name after '.'
+        private int jpgAdded = 0; // needed to keep track of index to listOfJpgs when adding a new one
+        
+        JpgFilesList(File directory){
+            this.jpgList = new JpgFile[getNumOfJpgs()];
+
+            // run though the list of files and find the names and sizes of the .jpgs
+            // then add a 
+            for(int i=0; i < listOfFiles.length; i++){
+                currentFile = listOfFiles[i].getName();
+                index = currentFile.lastIndexOf(".");
+                extension = currentFile.substring(index + 1);
+                if (extension.toUpperCase() == EXTENSION){
+                  jpgList[jpgAdded]  =  new JpgFile(listOfFiles[i]);
+                  jpgAdded++;
+                }
+            }
+        }
+        class JpgFile{
+        // constructs a name and size object for the file
+        //used in JpgFilesList to make an array of jpg file names and sizes
+            private int size;
+            private String fileName;
+        
+            JpgFile(File f){
+                this.size = (int)f.length();
+                this.fileName = f.getName();
+            }
+        }
+        @Override
+        public String toString(){
+            String output = "";
+            for (int i = 0; i <= getNumOfJpgs(); i++){
+                output.concat(jpgList[i].fileName + "    ");
+                output.concat(jpgList[i].size + "/n");
+            }
+            return output;
+        }
+    }
+}
+   
+
